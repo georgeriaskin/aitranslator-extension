@@ -10,6 +10,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const inputText = document.getElementById('inputText');
     const translateBtn = document.getElementById('translateBtn');
     const outputText = document.getElementById('outputText');
+    const settingsGear = document.getElementById('settingsGear');
+    const closeModal = document.getElementById('closeModal');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const inputCharCount = document.getElementById('inputCharCount');
+    const outputCharCount = document.getElementById('outputCharCount');
+
+    // Modal events
+    settingsGear.addEventListener('click', function() {
+        document.getElementById('settingsModal').style.display = 'block';
+    });
+
+    closeModal.addEventListener('click', function() {
+        document.getElementById('settingsModal').style.display = 'none';
+    });
+
+    modalOverlay.addEventListener('click', function() {
+        document.getElementById('settingsModal').style.display = 'none';
+    });
+
+    // Char count function
+    function updateCharCount(textarea, countElement) {
+        countElement.textContent = `${textarea.value.length} characters`;
+    }
+
+    // Input char count
+    inputText.addEventListener('input', function() {
+        updateCharCount(inputText, inputCharCount);
+    });
 
     // Load API key
     const savedApiKey = localStorage.getItem('openrouter_api_key');
@@ -77,12 +105,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const sourceLang = sourceLangSelect.value;
+        let sourceLang = sourceLangSelect.value;
+        if (sourceLang === 'Automatic') {
+            sourceLang = 'Russian'; // Default for automatic detection
+        }
         const targetLang = targetLangSelect.value;
         const model = modelSelect.value;
 
         if (sourceLang === targetLang) {
             outputText.value = text;
+            updateCharCount(outputText, outputCharCount);
             return;
         }
 
@@ -132,6 +164,7 @@ Translate the following text from ${sourceLang} into ${targetLang} following the
             const translation = data.choices[0].message.content.trim();
 
             outputText.value = translation;
+            updateCharCount(outputText, outputCharCount);
         } catch (error) {
             console.error(error);
             outputText.value = `Error: ${error.message}`;
