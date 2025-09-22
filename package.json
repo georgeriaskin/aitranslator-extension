@@ -1,0 +1,8 @@
+{
+  "name": "aitranslator",
+  "version": "1.0.0",
+  "description": "AI Translator with Vercel backend proxy",
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}

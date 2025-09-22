@@ -1,7 +1,5 @@
 // Load saved data on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const apiKeyInput = document.getElementById('apiKey');
-    const saveApiKeyBtn = document.getElementById('saveApiKey');
     const modelSelect = document.getElementById('modelSelect');
     const newModelInput = document.getElementById('newModel');
     const addModelBtn = document.getElementById('addModel');
@@ -39,11 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCharCount(inputText, inputCharCount);
     });
 
-    // Load API key
-    const savedApiKey = localStorage.getItem('openrouter_api_key');
-    if (savedApiKey) {
-        apiKeyInput.value = savedApiKey;
-    }
 
     // Pre-populate models
     let models = JSON.parse(localStorage.getItem('openrouter_models')) || [
@@ -64,16 +57,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     loadModels();
 
-    // Save API key
-    saveApiKeyBtn.addEventListener('click', function() {
-        const apiKey = apiKeyInput.value.trim();
-        if (apiKey) {
-            localStorage.setItem('openrouter_api_key', apiKey);
-            alert('API key saved!');
-        } else {
-            alert('Please enter an API key.');
-        }
-    });
 
     // Add new model
     addModelBtn.addEventListener('click', function() {
@@ -93,12 +76,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Translate
     translateBtn.addEventListener('click', async function() {
-        const apiKey = localStorage.getItem('openrouter_api_key');
-        if (!apiKey) {
-            alert('Please save your API key first.');
-            return;
-        }
-
         const text = inputText.value.trim();
         if (!text) {
             alert('Please enter text to translate.');
@@ -118,50 +95,31 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // System prompt for rules
-        const systemPrompt = `You are a professional human translator.
-Translate the following text from ${sourceLang} into ${targetLang} following these rules:
-
-1. Use simple, natural, human-like language.
-2. Avoid formal or bureaucratic style — no overcomplicated phrasing, no official tone.
-3. The translation must sound friendly, polite, and conversational.
-4. Always make the text feel as if it were originally written by a native ${targetLang} speaker.
-5. Use natural contractions (don't, can't, it's, etc.) where appropriate.
-6. Do not translate word-for-word. Preserve the meaning, but adapt idioms and phrases naturally.
-7. Never use “—” (em dash). Use shorter dashes or commas if needed.
-8. Avoid robotic or AI-like tone.
-9. Do not include explanations or extra text — return only the translation.
-10. Adapt the style depending on context (marketing, blog, UI text, customer support, technical).`;
-
         try {
             translateBtn.disabled = true;
             translateBtn.textContent = 'Translating...';
 
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            const response = await fetch('/api/translate', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: model,
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: text }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 1000
+                    text: text,
+                    sourceLang: sourceLang,
+                    targetLang: targetLang,
+                    model: model
                 })
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error Details:', errorText);
-                throw new Error(`API error: ${response.status} ${response.statusText} - ${errorText}`);
+                const errorData = await response.json();
+                console.error('API Error Details:', errorData);
+                throw new Error(errorData.error || `API error: ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
-            const translation = data.choices[0].message.content.trim();
+            const translation = data.translation.trim();
 
             outputText.value = translation;
             updateCharCount(outputText, outputCharCount);
