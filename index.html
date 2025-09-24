@@ -8,7 +8,6 @@
 </head>
 <body>
     <div class="container">
-        <h1>AI Translator</h1>
         
         <!-- Header with Languages and Settings Gear -->
         <header class="header">
@@ -22,8 +21,8 @@
                     <option value="English">English</option>
                     <option value="Russian">Russian</option>
                 </select>
+                <select id="modelSelect"></select>
             </div>
-            <div id="settingsGear" class="gear-icon">⚙</div>
         </header>
         
         <!-- Input Section -->
@@ -41,28 +40,6 @@
             <span id="outputCharCount" class="char-count">0 characters</span>
         </section>
         
-        <!-- Settings Modal -->
-        <div id="settingsModal" class="modal">
-            <div class="modal-overlay" id="modalOverlay"></div>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Settings</h2>
-                    <span id="closeModal" class="close">&times;</span>
-                </div>
-                
-                <!-- Model Section -->
-                <section class="section">
-                    <h3>Model</h3>
-                    <select id="modelSelect">
-                        <option value="deepseek/deepseek-chat-v3.1:free">DeepSeek V3.1 (Free)</option>
-                        <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                        <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
-                    </select>
-                    <input type="text" id="newModel" placeholder="Add new model (e.g., deepseek/deepseek-chat-v3.1:free)">
-                    <button id="addModel">Add Model</button>
-                </section>
-            </div>
-        </div>
     </div>
     
     <script src="script.js"></script>

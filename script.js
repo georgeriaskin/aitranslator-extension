@@ -1,31 +1,13 @@
 // Load saved data on page load
 document.addEventListener('DOMContentLoaded', function() {
     const modelSelect = document.getElementById('modelSelect');
-    const newModelInput = document.getElementById('newModel');
-    const addModelBtn = document.getElementById('addModel');
     const sourceLangSelect = document.getElementById('sourceLang');
     const targetLangSelect = document.getElementById('targetLang');
     const inputText = document.getElementById('inputText');
     const translateBtn = document.getElementById('translateBtn');
     const outputText = document.getElementById('outputText');
-    const settingsGear = document.getElementById('settingsGear');
-    const closeModal = document.getElementById('closeModal');
-    const modalOverlay = document.getElementById('modalOverlay');
     const inputCharCount = document.getElementById('inputCharCount');
     const outputCharCount = document.getElementById('outputCharCount');
-
-    // Modal events
-    settingsGear.addEventListener('click', function() {
-        document.getElementById('settingsModal').style.display = 'block';
-    });
-
-    closeModal.addEventListener('click', function() {
-        document.getElementById('settingsModal').style.display = 'none';
-    });
-
-    modalOverlay.addEventListener('click', function() {
-        document.getElementById('settingsModal').style.display = 'none';
-    });
 
     // Char count function
     function updateCharCount(textarea, countElement) {
@@ -48,31 +30,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load models into select
     function loadModels() {
         modelSelect.innerHTML = '';
+        const customNames = {
+            'deepseek/deepseek-chat-v3.1:free': 'DeepSeek V3.1 (Free)',
+            'openai/gpt-3.5-turbo': 'GPT-3.5 Turbo',
+            'anthropic/claude-3-haiku': 'Claude 3 Haiku'
+        };
         models.forEach(model => {
             const option = document.createElement('option');
             option.value = model;
-            option.textContent = model.split('/').pop().replace(/:free$/, '') || model;
+            option.textContent = customNames[model] || model.split('/').pop().replace(/:free$/, '') || model;
             modelSelect.appendChild(option);
         });
     }
     loadModels();
 
-
-    // Add new model
-    addModelBtn.addEventListener('click', function() {
-        const newModel = newModelInput.value.trim();
-        if (newModel && !models.includes(newModel)) {
-            models.push(newModel);
-            localStorage.setItem('openrouter_models', JSON.stringify(models));
-            loadModels();
-            newModelInput.value = '';
-            alert('Model added!');
-        } else if (models.includes(newModel)) {
-            alert('Model already exists.');
-        } else {
-            alert('Please enter a valid model name.');
-        }
-    });
 
     // Translate
     translateBtn.addEventListener('click', async function() {
