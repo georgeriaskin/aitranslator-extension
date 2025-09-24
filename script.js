@@ -76,6 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
             translateBtn.disabled = true;
             translateBtn.textContent = 'Translating...';
 
+            outputText.value = '';
+            updateCharCount(outputText, outputCharCount);
+
             const response = await fetch('/api/translate', {
                 method: 'POST',
                 headers: {
@@ -92,28 +95,35 @@ document.addEventListener('DOMContentLoaded', function() {
             const responseText = await response.text();
             if (!response.ok || !responseText.startsWith('{')) {
                 if (responseText.includes('<!DOCTYPE')) {
-                    alert('Translation API unavailable locally (static server). Deploy to Vercel for full functionality.');
+                    alert('Translation API unavailable locally...');
+                    outputText.value = '';
+                    updateCharCount(outputText, outputCharCount);
                     return;
                 } else {
                     try {
                         const errorData = JSON.parse(responseText);
-                        console.error('API Error Details:', errorData);
-                        throw new Error(errorData.error || `API error: ${response.status} ${response.statusText}`);
-                    } catch (e) {
-                        console.error('API Error Details:', text);
-                        throw new Error(`API error: ${response.status} ${response.statusText}`);
+                        throw new Error(errorData.error || `API error: ${response.status}`);
+                    } catch (parseErr) {
+                        throw new Error(`Invalid response: ${response.status}`);
                     }
                 }
-            } else {
-                const data = JSON.parse(responseText);
             }
-            const translation = data.translation.trim();
-
-            outputText.value = translation;
-            updateCharCount(outputText, outputCharCount);
+            try {
+                const data = JSON.parse(responseText);
+                if (!data || !data.translation) {
+                    throw new Error('Invalid response format');
+                }
+                const translation = data.translation.trim();
+                outputText.value = translation;
+                updateCharCount(outputText, outputCharCount);
+            } catch (parseErr) {
+                console.error('Parse error:', parseErr);
+                throw new Error('Invalid JSON response from API');
+            }
         } catch (error) {
             console.error(error);
             outputText.value = `Error: ${error.message}`;
+            updateCharCount(outputText, outputCharCount);
             alert(`Translation failed: ${error.message}`);
         } finally {
             translateBtn.disabled = false;
