@@ -23,17 +23,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Pre-populate models
     let models = JSON.parse(localStorage.getItem('openrouter_models')) || [
         'deepseek/deepseek-chat-v3.1:free',
-        'openai/gpt-3.5-turbo',
-        'anthropic/claude-3-haiku'
+        'x-ai/grok-4-fast:free',
+        'qwen/qwen3-235b-a22b:free',
+        'google/gemini-2.0-flash-exp:free',
+        'mistralai/mistral-small-3.2-24b-instruct:free',
+        'meta-llama/llama-4-maverick:free'
     ];
 
     // Load models into select
     function loadModels() {
         modelSelect.innerHTML = '';
         const customNames = {
-            'deepseek/deepseek-chat-v3.1:free': 'DeepSeek V3.1 (Free)',
-            'openai/gpt-3.5-turbo': 'GPT-3.5 Turbo',
-            'anthropic/claude-3-haiku': 'Claude 3 Haiku'
+            'deepseek/deepseek-chat-v3.1:free': 'DeepSeek V3.1',
+            'x-ai/grok-4-fast:free': 'Grok 4 Fast',
+            'qwen/qwen3-235b-a22b:free': 'Qwen 3',
+            'google/gemini-2.0-flash-exp:free': 'Gemini 2.0',
+            'mistralai/mistral-small-3.2-24b-instruct:free': 'Mistral Small',
+            'meta-llama/llama-4-maverick:free': 'Llama 4 Maverick'
         };
         models.forEach(model => {
             const option = document.createElement('option');
@@ -83,13 +89,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('API Error Details:', errorData);
-                throw new Error(errorData.error || `API error: ${response.status} ${response.statusText}`);
+            const text = await response.text();
+            if (!response.ok || !text.startsWith('{')) {
+                if (text.includes('<!DOCTYPE')) {
+                    alert('Translation API unavailable locally (static server). Deploy to Vercel for full functionality.');
+                    return;
+                } else {
+                    try {
+                        const errorData = JSON.parse(text);
+                        console.error('API Error Details:', errorData);
+                        throw new Error(errorData.error || `API error: ${response.status} ${response.statusText}`);
+                    } catch (e) {
+                        console.error('API Error Details:', text);
+                        throw new Error(`API error: ${response.status} ${response.statusText}`);
+                    }
+                }
+            } else {
+                const data = JSON.parse(text);
             }
-
-            const data = await response.json();
             const translation = data.translation.trim();
 
             outputText.value = translation;
