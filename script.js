@@ -89,14 +89,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             });
 
-            const text = await response.text();
-            if (!response.ok || !text.startsWith('{')) {
-                if (text.includes('<!DOCTYPE')) {
+            const responseText = await response.text();
+            if (!response.ok || !responseText.startsWith('{')) {
+                if (responseText.includes('<!DOCTYPE')) {
                     alert('Translation API unavailable locally (static server). Deploy to Vercel for full functionality.');
                     return;
                 } else {
                     try {
-                        const errorData = JSON.parse(text);
+                        const errorData = JSON.parse(responseText);
                         console.error('API Error Details:', errorData);
                         throw new Error(errorData.error || `API error: ${response.status} ${response.statusText}`);
                     } catch (e) {
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } else {
-                const data = JSON.parse(text);
+                const data = JSON.parse(responseText);
             }
             const translation = data.translation.trim();
 
