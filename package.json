@@ -4,5 +4,8 @@
   "description": "AI Translator with Vercel backend proxy",
   "scripts": {
     "dev": "vercel dev"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
   }
 }

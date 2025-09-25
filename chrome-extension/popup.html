@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Translator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Header with Languages and Settings Gear -->
+        <header class="header">
+            <div class="lang-controls">
+                <select id="sourceLang">
+                    <option value="Automatic">🌎 Automatic</option>
+                    <option value="Russian">🇷🇺 Russian</option>
+                    <option value="English">🇺🇸 English</option>
+                    <option value="Spanish">🇪🇸 Spanish</option>
+                    <option value="French">🇫🇷 French</option>
+                    <option value="German">🇩🇪 German</option>
+                    <option value="Chinese">🇨🇳 Chinese</option>
+                    <option value="Japanese">🇯🇵 Japanese</option>
+                    <option value="Italian">🇮🇹 Italian</option>
+                    <option value="Portuguese">🇵🇹 Portuguese</option>
+                </select>
+                <select id="targetLang">
+                    <option value="English">🇺🇸 English</option>
+                    <option value="Russian">🇷🇺 Russian</option>
+                    <option value="Spanish">🇪🇸 Spanish</option>
+                    <option value="French">🇫🇷 French</option>
+                    <option value="German">🇩🇪 German</option>
+                    <option value="Chinese">🇨🇳 Chinese</option>
+                    <option value="Japanese">🇯🇵 Japanese</option>
+                    <option value="Italian">🇮🇹 Italian</option>
+                    <option value="Portuguese">🇵🇹 Portuguese</option>
+                </select>
+                <select id="modelSelect"></select>
+            </div>
+        </header>
+        
+        <!-- Input Section -->
+        <section class="input-section">
+            <textarea id="inputText" placeholder="Type to translate" rows="6"></textarea>
+            <span id="inputCharCount" class="char-count">0 characters</span>
+        </section>
+        
+        <!-- Translate Button -->
+        <button id="translateBtn" class="translate-btn">Translate</button>
+        
+        <!-- Output Section -->
+        <section class="output-section">
+            <textarea id="outputText" placeholder="The translation will appear here" rows="6" readonly></textarea>
+            <span id="outputCharCount" class="char-count">0 characters</span>
+        </section>
+        
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
