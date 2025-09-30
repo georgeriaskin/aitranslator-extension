@@ -15,9 +15,7 @@
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
     "https://*.vercel.app/*",
-    "http://localhost:3000/*"
-  ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*.vercel.app/* http://localhost:3000/*;"
-  }
+    "http://localhost:3000/*",
+    "https://aitranslator-qy7i3d4d6-kudapolet-gmailcoms-projects.vercel.app/*"
+  ]
 }

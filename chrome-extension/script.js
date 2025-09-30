@@ -1,5 +1,5 @@
 // Load saved data on page load
-const API_BASE = 'http://localhost:3000';
+const API_BASE = 'https://aitranslator-qy7i3d4d6-kudapolet-gmailcoms-projects.vercel.app';
 
 document.addEventListener('DOMContentLoaded', function() {
     const modelSelect = document.getElementById('modelSelect');
@@ -10,7 +10,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const outputText = document.getElementById('outputText');
     const inputCharCount = document.getElementById('inputCharCount');
     const outputCharCount = document.getElementById('outputCharCount');
-
+    
+    // Load last translation if available
+    const lastOriginal = localStorage.getItem('lastOriginal');
+    const lastTranslated = localStorage.getItem('lastTranslated');
+    if (lastOriginal && lastTranslated) {
+        inputText.value = lastOriginal;
+        outputText.value = lastTranslated;
+        updateCharCount(inputText, inputCharCount);
+        updateCharCount(outputText, outputCharCount);
+    }
+ 
     // Char count function
     function updateCharCount(textarea, countElement) {
         countElement.textContent = `${textarea.value.length} characters`;
@@ -51,7 +61,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     loadModels();
-
+    
+    // Load saved model
+    const savedModel = localStorage.getItem('selectedModel') || models[0];
+    modelSelect.value = savedModel;
+    modelSelect.addEventListener('change', function() {
+        localStorage.setItem('selectedModel', this.value);
+    });
+  
  
     // Translate
     translateBtn.addEventListener('click', async function() {
@@ -96,36 +113,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
             });
 
-            console.log('Fetch response status:', response.status, 'text preview:', (await response.text()).substring(0, 100));
-
-            const responseText = await response.text();
-            if (!response.ok || !responseText.startsWith('{')) {
-                if (responseText.includes('<!DOCTYPE')) {
-                    alert('Translation API unavailable locally...');
-                    outputText.value = '';
-                    updateCharCount(outputText, outputCharCount);
-                    return;
-                } else {
-                    try {
-                        const errorData = JSON.parse(responseText);
-                        throw new Error(errorData.error || `API error: ${response.status}`);
-                    } catch (parseErr) {
-                        throw new Error(`Invalid response: ${response.status}`);
-                    }
-                }
+            console.log('Fetch response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
             }
-            try {
-                const data = JSON.parse(responseText);
-                if (!data || !data.translation) {
-                    throw new Error('Invalid response format');
-                }
-                const translation = data.translation.trim();
-                outputText.value = translation;
-                updateCharCount(outputText, outputCharCount);
-            } catch (parseErr) {
-                console.error('Parse error:', parseErr);
-                throw new Error('Invalid JSON response from API');
+            const data = await response.json();
+            if (!data || !data.translation) {
+                throw new Error('Invalid response format');
             }
+            const translation = data.translation.trim();
+            outputText.value = translation;
+            updateCharCount(outputText, outputCharCount);
+            
+            // Save last translation
+            localStorage.setItem('lastOriginal', text);
+            localStorage.setItem('lastTranslated', translation);
+            
+            console.log('Translation successful');
         } catch (error) {
             console.error('Detailed fetch error:', error);
             console.error('Error message:', error.message);
