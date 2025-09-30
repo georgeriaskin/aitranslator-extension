@@ -1,7 +1,9 @@
 const express = require('express');
+const cors = require('cors');
 const handlerImport = require('./api/translate.js');
 
 const app = express();
+app.use(cors({origin: true}));
 app.use(express.json());
 
 app.get('/', (req, res) => {

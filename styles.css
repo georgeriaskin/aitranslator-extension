@@ -70,11 +70,11 @@ button:hover {
     padding: 15px;
     font-size: 1.1em;
     margin: 20px 0;
-    background-color: #e1f4e1;
+    background-color: #39c839;
 }
 
 .translate-btn:hover {
-    background-color: #c8e6c8;
+    background-color: #4ed64e;
 }
 
 .lang-select {

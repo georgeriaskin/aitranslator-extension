@@ -85,14 +85,14 @@ button:hover {
     padding: 8px 0;
     font-size: 16px;
     margin: 10px 0;
-    background-color: #e1f4e1;
+    background-color: #36c838;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 
 .translate-btn:hover {
-    background-color: #c8e6c8;
+    background-color: #4ed64e;
 }
 
 .lang-select {
