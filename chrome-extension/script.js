@@ -25,6 +25,27 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCharCount(textarea, countElement) {
         countElement.textContent = `${textarea.value.length} characters`;
     }
+// Fetch selected text from active tab
+chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+  if (tabs && tabs[0]) {
+    chrome.scripting.executeScript({
+      target: {tabId: tabs[0].id},
+      func: () => window.getSelection().toString()
+    }, (results) => {
+      if (results && results[0] && results[0].result) {
+        const selectedText = results[0].result.trim();
+        if (selectedText) {
+          inputText.value = selectedText;
+          updateCharCount(inputText, inputCharCount);
+          const selectedNote = document.getElementById('selectedNote');
+          if (selectedNote) {
+            selectedNote.style.display = 'block';
+          }
+        }
+      }
+    });
+  }
+});
 
     // Input char count
     inputText.addEventListener('input', function() {
