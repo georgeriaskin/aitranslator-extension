@@ -1,8 +1,8 @@
 // Load saved data on page load
-const API_BASE = 'https://aitranslator-qy7i3d4d6-kudapolet-gmailcoms-projects.vercel.app';
+const API_BASE = 'https://aitranslator-extension.vercel.app/';
 
 document.addEventListener('DOMContentLoaded', function() {
-    const modelSelect = document.getElementById('modelSelect');
+    const toneSelect = document.getElementById('toneSelect');
     const sourceLangSelect = document.getElementById('sourceLang');
     const targetLangSelect = document.getElementById('targetLang');
     const inputText = document.getElementById('inputText');
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCharCount(inputText, inputCharCount);
         updateCharCount(outputText, outputCharCount);
     }
- 
+
     // Char count function
     function updateCharCount(textarea, countElement) {
         countElement.textContent = `${textarea.value.length} characters`;
@@ -31,45 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCharCount(inputText, inputCharCount);
     });
 
- 
-    // Pre-populate models
-    let models = JSON.parse(localStorage.getItem('openrouter_models')) || [
-        'deepseek/deepseek-chat-v3.1:free',
-        'x-ai/grok-4-fast:free',
-        'qwen/qwen3-235b-a22b:free',
-        'google/gemini-2.0-flash-exp:free',
-        'mistralai/mistral-small-3.2-24b-instruct:free',
-        'meta-llama/llama-4-maverick:free'
-    ];
-
-    // Load models into select
-    function loadModels() {
-        modelSelect.innerHTML = '';
-        const customNames = {
-            'deepseek/deepseek-chat-v3.1:free': 'DeepSeek V3.1',
-            'x-ai/grok-4-fast:free': 'Grok 4 Fast',
-            'qwen/qwen3-235b-a22b:free': 'Qwen 3',
-            'google/gemini-2.0-flash-exp:free': 'Gemini 2.0',
-            'mistralai/mistral-small-3.2-24b-instruct:free': 'Mistral Small',
-            'meta-llama/llama-4-maverick:free': 'Llama 4 Maverick'
-        };
-        models.forEach(model => {
-            const option = document.createElement('option');
-            option.value = model;
-            option.textContent = customNames[model] || model.split('/').pop().replace(/:free$/, '') || model;
-            modelSelect.appendChild(option);
-        });
-    }
-    loadModels();
-    
-    // Load saved model
-    const savedModel = localStorage.getItem('selectedModel') || models[0];
-    modelSelect.value = savedModel;
-    modelSelect.addEventListener('change', function() {
-        localStorage.setItem('selectedModel', this.value);
+    // Load saved tone
+    const savedTone = localStorage.getItem('selectedTone') || 'Formal';
+    toneSelect.value = savedTone;
+    toneSelect.addEventListener('change', function() {
+        localStorage.setItem('selectedTone', this.value);
     });
-  
- 
+
     // Translate
     translateBtn.addEventListener('click', async function() {
         const text = inputText.value.trim();
@@ -79,20 +47,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let sourceLang = sourceLangSelect.value;
-        if (sourceLang === 'Automatic') {
+        if (sourceLang === 'Auto') {
             sourceLang = 'Russian'; // Default for automatic detection
         }
         const targetLang = targetLangSelect.value;
-        const model = modelSelect.value;
+        const tone = toneSelect.value;
+
+        // DEBUG: Log all parameters before validation
+        // DEBUG: Log all parameters before validation
+        // console.log('=== TRANSLATION DEBUG START ===');
+        // console.log('Input text length:', text.length);
+        // console.log('Source language:', sourceLang);
+        // console.log('Target language:', targetLang);
+        // console.log('Tone:', tone);
+        // console.log('Source === Target?', sourceLang === targetLang);
 
         if (sourceLang === targetLang) {
+            // console.log('Skipping translation - source and target languages are the same');
             outputText.value = text;
             updateCharCount(outputText, outputCharCount);
             return;
         }
 
         try {
-            console.log('Starting translation fetch to', `${API_BASE}/api/translate`, 'with payload:', { text: text.substring(0, 50) + '...', sourceLang, targetLang, model });
+            // DEBUG: Log the exact request being sent
+            // const requestPayload = {
+            //     text: text,
+            //     sourceLang: sourceLang,
+            //     targetLang: targetLang,
+            //     tone: tone
+            // };
+            //
+            // console.log('Starting translation fetch to', `${API_BASE}/api/translate`, 'with FULL payload:', JSON.stringify(requestPayload, null, 2));
+            // console.log('Request URL:', `${API_BASE}/api/translate`);
+            // console.log('Request headers:', {
+            //     'Content-Type': 'application/json'
+            // });
 
             translateBtn.disabled = true;
             translateBtn.textContent = 'Translating...';
@@ -109,19 +99,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     text: text,
                     sourceLang: sourceLang,
                     targetLang: targetLang,
-                    model: model
+                    tone: tone
                 })
             });
 
-            console.log('Fetch response status:', response.status);
+            // DEBUG: Log response details
+            // console.log('Fetch response status:', response.status);
+            // console.log('Fetch response headers:', Object.fromEntries(response.headers.entries()));
+            
+            const responseText = await response.text();
+            // console.log('Raw response body:', responseText);
+
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                throw new Error(`HTTP ${response.status}: ${responseText}`);
             }
-            const data = await response.json();
+            
+            const data = JSON.parse(responseText);
+            // console.log('Parsed response data:', data);
+            
             if (!data || !data.translation) {
-                throw new Error('Invalid response format');
+                console.error('Invalid response format - missing translation field');
+                throw new Error('Invalid response format: missing translation field');
             }
+            
             const translation = data.translation.trim();
+            // console.log('Final translation:', translation);
+            
             outputText.value = translation;
             updateCharCount(outputText, outputCharCount);
             
@@ -129,11 +132,16 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('lastOriginal', text);
             localStorage.setItem('lastTranslated', translation);
             
-            console.log('Translation successful');
+            // console.log('Translation successful');
+            // console.log('=== TRANSLATION DEBUG END ===');
         } catch (error) {
-            console.error('Detailed fetch error:', error);
-            console.error('Error message:', error.message);
-            if (error.cause) console.error('Error cause:', error.cause);
+            // console.error('=== TRANSLATION ERROR DEBUG START ===');
+            // console.error('Detailed fetch error:', error);
+            // console.error('Error message:', error.message);
+            // console.error('Error stack:', error.stack);
+            // if (error.cause) console.error('Error cause:', error.cause);
+            // console.error('=== TRANSLATION ERROR DEBUG END ===');
+            
             outputText.value = `Error: ${error.message}`;
             updateCharCount(outputText, outputCharCount);
             alert(`Translation failed: ${error.message}`);
